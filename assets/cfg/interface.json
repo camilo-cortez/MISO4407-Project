@@ -1,18 +1,26 @@
 {
-    "title_text_color": {
-        "r": 255,
-        "g": 0,
-        "b": 0
+    "title_text": {
+       "color": {
+            "r": 255,
+            "g": 0,
+            "b": 0
+        },
+        "size": 8
     },
-    "normal_text_color": {
-        "r": 255,
-        "g": 255,
-        "b": 255
+    "normal_text": {
+        "color": {
+            "r": 255,
+            "g": 255,
+            "b": 255
+        },
+        "size": 6
     },
-    "high_score_color": {
-        "r": 30,
-        "g": 144,
-        "b": 255
-    },
-    "high_score_max_value": 1000
+    "high_score": {
+        "color": { 
+                "r": 30,
+            "g": 144,
+            "b": 255
+        },
+        "size": 6
+    }
 }
