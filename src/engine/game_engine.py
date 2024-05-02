@@ -29,7 +29,7 @@ class GameEngine:
         self.config = config
 
         self._scenes: dict[str, Scene] = {}
-        self._scenes["MENU_SCENE"] = MenuScene(self)
+        self._scenes["MENU_SCENE"] = MenuScene(config, self)
         self._scenes["PLAY_SCENE"] = PlayScene(config, self)
         self._current_scene: Optional[Scene] = None
         self._scene_name_to_switch: str = None
@@ -58,7 +58,7 @@ class GameEngine:
 
     def _calculate_time(self):
         self._clock.tick(self.config.window.framerate)
-        self._delta_time = self._clock.get_time() / 1000.0
+        self.delta_time = self._clock.get_time() / 1000.0
 
     def _process_events(self):
         for event in pygame.event.get():
@@ -67,7 +67,7 @@ class GameEngine:
                 self.is_running = False
 
     def _update(self):
-        self._current_scene.simulate(self._delta_time)
+        self._current_scene.simulate(self.delta_time)
 
     def _draw(self):
         color = self.config.window.bg_color

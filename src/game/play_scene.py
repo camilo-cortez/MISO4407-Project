@@ -4,7 +4,8 @@ import pygame
 
 import src.engine.game_engine
 from configurations.global_config import GlobalConfig
-from src.create.prefab_creator_game import create_game_input, create_player
+from src.create.prefab_creator_game import (create_game_input, create_player,
+                                            create_star_spawner)
 from src.create.prefab_creator_interface import TextAlignment, create_text
 from src.ecs.components.c_input_command import CInputCommand, CommandPhase
 from src.ecs.components.c_surface import CSurface
@@ -12,6 +13,7 @@ from src.ecs.components.c_transform import CTransform
 from src.ecs.components.c_velocity import CVelocity
 from src.ecs.systems.s_movement import system_movement
 from src.ecs.systems.s_screen_player import system_screen_player
+from src.ecs.systems.s_star_spawner import system_star_spawner
 from src.engine.scenes.scene import Scene
 
 
@@ -43,10 +45,14 @@ class PlayScene(Scene):
             self.player_entity, CVelocity)
 
         create_game_input(self.ecs_world)
+        create_star_spawner(self.ecs_world, self.config.starfield,
+                            self._game_engine.screen_props)
 
     def do_update(self, delta_time: float):
         system_screen_player(self.ecs_world, self.screen_rect,
                              self._game_engine.screen_props.margin)
+        system_star_spawner(
+            self.ecs_world, self._game_engine.delta_time, self._game_engine.screen_props)
         if not self._paused:
             system_movement(self.ecs_world, delta_time)
 
