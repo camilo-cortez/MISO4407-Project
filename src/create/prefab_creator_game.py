@@ -1,11 +1,15 @@
 
+import random
+
 import pygame
 
 import esper
 from configurations.player_config import PlayerConfig
 from configurations.shared_config import Position
-from src.create.prefab_creator import create_sprite
+from configurations.starfield_config import StarFieldConfig
+from src.create.prefab_creator import create_sprite, create_square
 from src.ecs.components.c_input_command import CInputCommand
+from src.ecs.components.c_star_spawner import CStarSpawner, StarSpawnEvent
 from src.ecs.components.tags.c_tag_player import CTagPlayer
 from src.engine.screen_properties import ScreenProperties
 from src.engine.service_locator import ServiceLocator
@@ -36,3 +40,23 @@ def create_player(world: esper.World, player_cfg: PlayerConfig, screen_props: Sc
     entity = create_sprite(world, Position(pos_x, pos_y), vel, surf)
     world.add_component(entity, CTagPlayer())
     return entity
+
+
+def create_star_spawner(world: esper.World, config: StarFieldConfig, screen_props: ScreenProperties):
+    spawner_entity = world.create_entity()
+
+    # Cada medio segundo verifica las estrellas
+    spawner = CStarSpawner(update_frequency=0.5)
+    for _ in range(config.number_of_stars):
+        x = random.uniform(0, screen_props.width)
+        y = random.uniform(0, screen_props.height)
+        color = random.choice(config.star_colors)
+        speed = random.uniform(config.vertical_speed.min,
+                               config.vertical_speed.max)
+        blink_rate = random.uniform(
+            config.blink_rate.min, config.blink_rate.max)
+        size = random.randint(1, 3)
+        spawner.spawn_events.append(StarSpawnEvent(
+            x, y, color, speed, blink_rate, size, active=True))
+
+    world.add_component(spawner_entity, spawner)
