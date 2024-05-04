@@ -4,14 +4,19 @@ import random
 import pygame
 
 from configurations.bullet_config import BulletConfig
+from configurations.enemy_config import EnemyConfig
+from configurations.explosion_config import ExplosionConfig
 import esper
 from configurations.player_config import PlayerConfig
 from configurations.shared_config import Position
 from configurations.starfield_config import StarFieldConfig
 from src.create.prefab_creator import create_sprite, create_square
+from src.ecs.components.c_animation import CAnimation
 from src.ecs.components.c_input_command import CInputCommand
 from src.ecs.components.c_star_spawner import CStarSpawner, StarSpawnEvent
 from src.ecs.components.tags.c_tag_bullet import CTagBullet
+from src.ecs.components.tags.c_tag_enemy import CTagEnemy
+from src.ecs.components.tags.c_tag_explosion import CTagExplosion
 from src.ecs.components.tags.c_tag_player import CTagPlayer
 from src.engine.screen_properties import ScreenProperties
 from src.engine.service_locator import ServiceLocator
@@ -78,3 +83,17 @@ def create_bullet(world:esper.World, pos_player:pygame.Vector2, bullet_cfg:Bulle
     bullet_entity = create_sprite(world, pos, vel, bullet_surface)
     world.add_component(bullet_entity, CTagBullet())
     ServiceLocator.sounds_service.play(bullet_cfg.sound)
+
+def create_explosion(world:esper.World, pos:pygame.Vector2, explosion_cfg:ExplosionConfig):
+    explosion_surf = ServiceLocator.images_service.get(explosion_cfg.image)
+    vel = pygame.Vector2(0,0)
+    explosion_entity = create_sprite(world, pos, vel, explosion_surf)
+    world.add_component(explosion_entity, CTagExplosion())
+    world.add_component(explosion_entity, CAnimation(explosion_cfg.animations))
+    ServiceLocator.sounds_service.play(explosion_cfg.sound)
+
+def create_enemy(world:esper.World, pos:pygame.Vector2, enemy_info:EnemyConfig):
+    enemy_surface = ServiceLocator.images_service.get(enemy_info.image)
+    velocity = pygame.Vector2(0,0)
+    enemy_entity = create_sprite(world, pos, velocity, enemy_surface)
+    world.add_component(enemy_entity, CTagEnemy())
