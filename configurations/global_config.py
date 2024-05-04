@@ -3,6 +3,7 @@ from typing import Dict
 
 from dacite import from_dict
 
+from configurations.bullet_config import BulletConfig
 from configurations.interface_config import InterfaceItemConfig
 from configurations.player_config import PlayerConfig
 from configurations.starfield_config import StarFieldConfig
@@ -16,6 +17,7 @@ class GlobalConfig:
     starfield: StarFieldConfig = field(init=False)
     interface: Dict[str, InterfaceItemConfig] = field(init=False)
     player: PlayerConfig = field(init=False)
+    bullet: BulletConfig = field(init=False)
     path: str
 
     def __post_init__(self):
@@ -23,6 +25,7 @@ class GlobalConfig:
         self._load_starfield_config()
         self._load_interface_config()
         self._load_player_config()
+        self._load_bullet_config()
 
     def _load_window_config(self):
         self.window = self._load_config(WindowConfig, 'window.json')
@@ -32,6 +35,9 @@ class GlobalConfig:
 
     def _load_player_config(self):
         self.player = self._load_config(PlayerConfig, 'player.json')
+    
+    def _load_bullet_config(self):
+        self.bullet = self._load_config(BulletConfig, 'bullet.json')
 
     def _load_interface_config(self):
         data = load_json(self.path + 'interface.json')

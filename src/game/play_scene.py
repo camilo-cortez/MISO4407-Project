@@ -2,9 +2,11 @@ import json
 
 import pygame
 
+from src.ecs.components.tags.c_tag_bullet import CTagBullet
+from src.ecs.systems.s_screen_bullet import system_screen_bullet
 import src.engine.game_engine
 from configurations.global_config import GlobalConfig
-from src.create.prefab_creator_game import (create_game_input, create_player,
+from src.create.prefab_creator_game import (create_bullet, create_game_input, create_player,
                                             create_star_spawner)
 from src.create.prefab_creator_interface import TextAlignment, create_text
 from src.ecs.components.c_input_command import CInputCommand, CommandPhase
@@ -43,6 +45,12 @@ class PlayScene(Scene):
 
         self._p_v = self.ecs_world.component_for_entity(
             self.player_entity, CVelocity)
+        
+        self._p_t = self.ecs_world.component_for_entity(
+            self.player_entity, CTransform)
+        
+        self._p_s = self.ecs_world.component_for_entity(
+            self.player_entity, CSurface)
 
         create_game_input(self.ecs_world)
         create_star_spawner(self.ecs_world, self.config.starfield,
@@ -51,6 +59,7 @@ class PlayScene(Scene):
     def do_update(self, delta_time: float):
         system_screen_player(self.ecs_world, self.screen_rect,
                              self._game_engine.screen_props.margin)
+        system_screen_bullet(self.ecs_world, self.screen_rect)
         system_star_spawner(
             self.ecs_world, self._game_engine.delta_time, self._game_engine.screen_props)
         if not self._paused:
@@ -70,6 +79,14 @@ class PlayScene(Scene):
                 self._p_v.vel.x += self.config.player.input_velocity
             elif action.phase == CommandPhase.END:
                 self._p_v.vel.x -= self.config.player.input_velocity
+        elif action.name == "PLAYER_FIRE":
+            if action.phase == CommandPhase.START:
+                player_size = pygame.Vector2(self._p_s.area.size[0], self._p_s.area.size[1])
+                max_bullets = 3
+                current_bullets = len(self.ecs_world.get_component(CTagBullet))
+                if (current_bullets < max_bullets): #TODO: change to use cd timer
+                    create_bullet(self.ecs_world, self._p_t.pos, self.config.bullet, player_size)
+        
 
         if action.name == "PAUSE" and action.phase == CommandPhase.START:
             self._paused = not self._paused
