@@ -3,6 +3,7 @@ import random
 
 import pygame
 
+from configurations.bullet_config import BulletConfig
 import esper
 from configurations.player_config import PlayerConfig
 from configurations.shared_config import Position
@@ -10,6 +11,7 @@ from configurations.starfield_config import StarFieldConfig
 from src.create.prefab_creator import create_sprite, create_square
 from src.ecs.components.c_input_command import CInputCommand
 from src.ecs.components.c_star_spawner import CStarSpawner, StarSpawnEvent
+from src.ecs.components.tags.c_tag_bullet import CTagBullet
 from src.ecs.components.tags.c_tag_player import CTagPlayer
 from src.engine.screen_properties import ScreenProperties
 from src.engine.service_locator import ServiceLocator
@@ -29,6 +31,11 @@ def create_game_input(world: esper.World):
     world.add_component(pause_action,
                         CInputCommand("PAUSE",
                                       pygame.K_p))
+    
+    player_fire_action = world.create_entity()
+    world.add_component(player_fire_action,
+                        CInputCommand("PLAYER_FIRE",
+                                      pygame.K_SPACE))
 
 
 def create_player(world: esper.World, player_cfg: PlayerConfig, screen_props: ScreenProperties):
@@ -60,3 +67,14 @@ def create_star_spawner(world: esper.World, config: StarFieldConfig, screen_prop
             x, y, color, speed, blink_rate, size, active=True))
 
     world.add_component(spawner_entity, spawner)
+
+def create_bullet(world:esper.World, pos_player:pygame.Vector2, bullet_cfg:BulletConfig, player_size:pygame.Vector2):
+    bullet_surface = ServiceLocator.images_service.get(bullet_cfg.image)
+    bullet_size = bullet_surface.get_rect().size
+    vel_direction = pygame.Vector2(0,-1)
+    vel = vel_direction * bullet_cfg.velocity
+    pos = pygame.Vector2(pos_player.x + player_size.x/2 - (bullet_size[0] / 2 ),
+                        pos_player.y + player_size.y/2 - (bullet_size[1] / 2 ))
+    bullet_entity = create_sprite(world, pos, vel, bullet_surface)
+    world.add_component(bullet_entity, CTagBullet())
+    ServiceLocator.sounds_service.play(bullet_cfg.sound)
