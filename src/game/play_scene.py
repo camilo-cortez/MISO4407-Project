@@ -3,10 +3,13 @@ import json
 import pygame
 
 from src.ecs.components.tags.c_tag_bullet import CTagBullet
+from src.ecs.systems.s_animation import system_animation
+from src.ecs.systems.s_collision_bullet_enemy import system_collision_bullet_enemy
+from src.ecs.systems.s_delete_explosions import system_delete_explosions
 from src.ecs.systems.s_screen_bullet import system_screen_bullet
 import src.engine.game_engine
 from configurations.global_config import GlobalConfig
-from src.create.prefab_creator_game import (create_bullet, create_game_input, create_player,
+from src.create.prefab_creator_game import (create_bullet, create_enemy, create_game_input, create_player,
                                             create_star_spawner)
 from src.create.prefab_creator_interface import TextAlignment, create_text
 from src.ecs.components.c_input_command import CInputCommand, CommandPhase
@@ -55,15 +58,21 @@ class PlayScene(Scene):
         create_game_input(self.ecs_world)
         create_star_spawner(self.ecs_world, self.config.starfield,
                             self._game_engine.screen_props)
+        
+        create_enemy(self.ecs_world, pygame.Vector2(100,100), self.config.enemy) #Test
 
     def do_update(self, delta_time: float):
         system_screen_player(self.ecs_world, self.screen_rect,
                              self._game_engine.screen_props.margin)
-        system_screen_bullet(self.ecs_world, self.screen_rect)
+       
         system_star_spawner(
             self.ecs_world, self._game_engine.delta_time, self._game_engine.screen_props)
         if not self._paused:
             system_movement(self.ecs_world, delta_time)
+            system_screen_bullet(self.ecs_world, self.screen_rect)
+            system_collision_bullet_enemy(self.ecs_world, self.config.enemy_explosion)
+            system_animation(self.ecs_world, delta_time)
+            system_delete_explosions(self.ecs_world)
 
     def do_clean(self):
         self._paused = False
