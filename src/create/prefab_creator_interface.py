@@ -4,6 +4,7 @@ import pygame
 
 import esper
 from configurations.shared_config import Color, Position
+from src.ecs.components.c_blink import CBlink
 from src.ecs.components.c_surface import CSurface
 from src.ecs.components.c_transform import CTransform
 from src.engine.service_locator import ServiceLocator
@@ -25,7 +26,6 @@ def create_text(world: esper.World, txt: str, size: int,
         txt, font, pygame.Color(color.r, color.g, color.b)))
     txt_s = world.component_for_entity(text_entity, CSurface)
 
-    # De acuerdo al alineamiento, determia el origine de la superficie
     origin = pygame.Vector2(0, 0)
     if alignment is TextAlignment.RIGHT:
         origin.x -= txt_s.area.right
@@ -34,4 +34,12 @@ def create_text(world: esper.World, txt: str, size: int,
 
     world.add_component(text_entity,
                         CTransform(pygame.Vector2(pos.x, pos.y) + origin))
+    return text_entity
+
+
+def create_blink_text(world: esper.World, txt: str, size: int,
+                      color: Color, pos: Position, alignment: TextAlignment) -> int:
+    text_entity = create_text(world, txt, size, color, pos, alignment)
+
+    world.add_component(text_entity, CBlink(0.5))
     return text_entity

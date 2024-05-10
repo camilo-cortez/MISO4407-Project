@@ -2,12 +2,13 @@ import pygame
 
 from configurations.global_config import GlobalConfig
 from configurations.shared_config import Color, Position
-from src.create.prefab_creator_game import create_star_spawner
-from src.create.prefab_creator_interface import TextAlignment, create_text
+from src.create.prefab_creator_game import create_star_spawner, create_stars
+from src.create.prefab_creator_interface import TextAlignment, create_blink_text, create_text
 from src.create.prefab_creator_menu import create_logo
 from src.ecs.components.c_input_command import CInputCommand
+from src.ecs.systems.s_blink import system_blink
 from src.ecs.systems.s_movement import system_movement
-from src.ecs.systems.s_star_spawner import system_star_spawner
+from src.ecs.systems.s_star_position import system_star_position
 from src.engine.scenes.scene import Scene
 
 
@@ -18,11 +19,12 @@ class MenuScene(Scene):
         self.config = config
 
     def do_create(self):
-        create_star_spawner(self.ecs_world, self.config.starfield,
-                            self._game_engine.screen_props)
+        create_stars(self.ecs_world, self.config.starfield,
+                     self._game_engine.screen_props)
+
         interface = self._game_engine.config.interface
         create_logo(self.ecs_world, self._game_engine.screen_props.center)
-        create_text(self.ecs_world, "PRESS Z TO START", interface["title_text"].size,
+        create_blink_text(self.ecs_world, "PRESS Z TO START", interface["title_text"].size,
                     interface["title_text"].color,
                     Position(self._game_engine.screen_props.center.x,
                              self._game_engine.screen_props.center.y+30),
@@ -33,8 +35,11 @@ class MenuScene(Scene):
                                      CInputCommand("START_GAME", pygame.K_z))
 
     def do_update(self, delta_time: float):
-        system_star_spawner(
-            self.ecs_world, self._game_engine.delta_time, self._game_engine.screen_props)
+        """ system_star_spawner(
+            self.ecs_world, self._game_engine.delta_time, self._game_engine.screen_props) """
+        system_star_position(self.ecs_world, self._game_engine.screen_props)
+        system_blink(self.ecs_world, delta_time)
+
         if not self._paused:
             system_movement(self.ecs_world, delta_time)
 
