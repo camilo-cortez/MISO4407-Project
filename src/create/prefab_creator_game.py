@@ -1,5 +1,6 @@
 
 import random
+from typing import Dict, List
 
 import pygame
 
@@ -7,6 +8,7 @@ import esper
 from configurations.bullet_config import BulletConfig
 from configurations.enemy_config import EnemyConfig
 from configurations.explosion_config import ExplosionConfig
+from configurations.level_config import LevelConfig
 from configurations.player_config import PlayerConfig
 from configurations.shared_config import Position
 from configurations.starfield_config import StarFieldConfig
@@ -57,26 +59,6 @@ def create_player(world: esper.World, player_cfg: PlayerConfig, screen_props: Sc
     return entity
 
 
-def create_star_spawner(world: esper.World, config: StarFieldConfig, screen_props: ScreenProperties):
-    spawner_entity = world.create_entity()
-
-    # Cada medio segundo verifica las estrellas
-    spawner = CStarSpawner(update_frequency=0.5)
-    for _ in range(config.number_of_stars):
-        x = random.uniform(0, screen_props.width)
-        y = random.uniform(0, screen_props.height)
-        color = random.choice(config.star_colors)
-        speed = random.uniform(config.vertical_speed.min,
-                               config.vertical_speed.max)
-        blink_rate = random.uniform(
-            config.blink_rate.min, config.blink_rate.max)
-        size = random.randint(1, 3)
-        spawner.spawn_events.append(StarSpawnEvent(
-            x, y, color, speed, blink_rate, size, active=True))
-
-    world.add_component(spawner_entity, spawner)
-
-
 def create_stars(world: esper.World, config: StarFieldConfig, screen_props: ScreenProperties):
     for _ in range(config.number_of_stars):
         x = random.uniform(0, screen_props.width)
@@ -116,6 +98,28 @@ def create_explosion(world: esper.World, pos: pygame.Vector2, explosion_cfg: Exp
 
 def create_enemy(world: esper.World, pos: pygame.Vector2, enemy_info: EnemyConfig):
     enemy_surface = ServiceLocator.images_service.get(enemy_info.image)
-    velocity = pygame.Vector2(0, 0)
+    velocity = pygame.Vector2(10, 0)
     enemy_entity = create_sprite(world, pos, velocity, enemy_surface)
+    world.add_component(enemy_entity, CAnimation(enemy_info.animations))
     world.add_component(enemy_entity, CTagEnemy())
+
+
+def create_enemies_grid(world: esper.World, level_config: LevelConfig, enemy_types: Dict[str, EnemyConfig], screen_props: ScreenProperties):
+    row_height = 15  # Altura en píxeles entre cada fila de enemigos.
+    column_width = 18  # Ancho en píxeles entre cada columna de enemigos.
+    start_y = 10  # Posición inicial y desde donde comienzan los enemigos.
+    # Calcula el número máximo de columnas de enemigos
+    max_columns = max(len(row_info.positions)
+                      for row_info in level_config.enemys_grid)
+    total_grid_width = max_columns * column_width
+
+    # Calcula start_x para centrar la grilla
+    start_x = (screen_props.width - total_grid_width) // 2
+
+    # Iteramos a través de la configuración del nivel para crear la grilla de enemigos
+    for row_info in level_config.enemys_grid:
+        enemy_type = enemy_types[row_info.type]
+        y = start_y + row_info.row * row_height
+        for col in row_info.positions:
+            x = start_x + col * column_width
+            create_enemy(world, pygame.Vector2(x, y), enemy_type)

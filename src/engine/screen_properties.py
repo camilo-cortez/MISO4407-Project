@@ -26,3 +26,6 @@ class ScreenProperties:
             x=margin, y=self.height - margin)
         self.bottom_right_margin = Position(
             x=self.width - margin, y=self.height - margin)
+
+        self.scr_rect_margin = pygame.Rect(self.top_left_margin.x, self.top_left_margin.y,
+                                           self.width - 2 * self.margin, self.height - 2 * self.margin)
