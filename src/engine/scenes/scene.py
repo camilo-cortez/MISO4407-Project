@@ -4,6 +4,7 @@ import esper
 from src.ecs.components.c_input_command import CInputCommand
 from src.ecs.systems.s_input import system_input
 from src.ecs.systems.s_rendering import system_rendering
+from src.ecs.systems.s_rendering_debug_hitbox import system_rendering_debug_hitbox
 import src.engine.game_engine
 
 class Scene:
@@ -34,6 +35,8 @@ class Scene:
 
     def do_draw(self, screen):
         system_rendering(self.ecs_world, screen)
+        #system_rendering_debug_hitbox(self.ecs_world, screen)
+
 
     def do_action(self, action:CInputCommand):
         pass
