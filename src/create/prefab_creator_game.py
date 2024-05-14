@@ -15,7 +15,9 @@ from configurations.starfield_config import StarFieldConfig
 from src.create.prefab_creator import create_sprite, create_square
 from src.ecs.components.c_animation import CAnimation
 from src.ecs.components.c_blink import CBlink
+from src.ecs.components.c_hitbox import CHitbox
 from src.ecs.components.c_input_command import CInputCommand
+from src.ecs.components.c_player_state import CPlayerState
 from src.ecs.components.c_star_spawner import CStarSpawner, StarSpawnEvent
 from src.ecs.components.c_transform import CTransform
 from src.ecs.components.tags.c_tag_bullet import CTagBullet
@@ -55,7 +57,12 @@ def create_player(world: esper.World, player_cfg: PlayerConfig, screen_props: Sc
     pos_x = screen_props.center.x - surf.get_width() // 2
     pos_y = screen_props.bottom_left_margin.y - surf.get_height()
     entity = create_sprite(world, Position(pos_x, pos_y), vel, surf)
+    world.add_component(entity, CAnimation(player_cfg.animations))
     world.add_component(entity, CTagPlayer())
+    world.add_component(entity, 
+                        CHitbox(pygame.FRect(0, 0, 
+                                             surf.get_height(), surf.get_height())))
+    world.add_component(entity, CPlayerState())
     return entity
 
 
@@ -81,7 +88,7 @@ def create_bullet(world: esper.World, pos_player: pygame.Vector2, bullet_cfg: Bu
     vel_direction = pygame.Vector2(0, -1)
     vel = vel_direction * bullet_cfg.velocity
     pos = pygame.Vector2(pos_player.x + player_size.x/2 - (bullet_size[0] / 2),
-                         pos_player.y + player_size.y/2 - (bullet_size[1] / 2))
+                         pos_player.y + player_size.y/2 - (bullet_size[1] * 2))
     bullet_entity = create_sprite(world, pos, vel, bullet_surface)
     world.add_component(bullet_entity, CTagBullet())
     ServiceLocator.sounds_service.play(bullet_cfg.sound)
@@ -100,8 +107,13 @@ def create_enemy(world: esper.World, pos: pygame.Vector2, enemy_info: EnemyConfi
     enemy_surface = ServiceLocator.images_service.get(enemy_info.image)
     velocity = pygame.Vector2(10, 0)
     enemy_entity = create_sprite(world, pos, velocity, enemy_surface)
+    width = enemy_surface.get_width() / enemy_info.animations.number_frames
+    height = enemy_surface.get_height()
     world.add_component(enemy_entity, CAnimation(enemy_info.animations))
     world.add_component(enemy_entity, CTagEnemy())
+    world.add_component(enemy_entity, 
+                        CHitbox(pygame.Rect(0, 0, width, height)))
+    return enemy_entity
 
 
 def create_enemies_grid(world: esper.World, level_config: LevelConfig, enemy_types: Dict[str, EnemyConfig], screen_props: ScreenProperties):
