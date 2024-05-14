@@ -2,7 +2,10 @@ import json
 
 import pygame
 
+from src.ecs.components.c_hitbox import CHitbox
+from src.ecs.components.c_player_state import CPlayerState, PlayerState
 from src.ecs.systems.s_collition_enemy_screen import system_collision_enemy_screen
+from src.ecs.systems.s_player_state import system_player_state
 import src.engine.game_engine
 from configurations.global_config import GlobalConfig
 from src.create.prefab_creator_game import (create_bullet, create_enemies_grid,
@@ -50,7 +53,7 @@ class PlayScene(Scene):
         self.player_entity = create_player(self.ecs_world,
                                            self.config.player,
                                            self._game_engine.screen_props)
-
+        
         self._p_v = self.ecs_world.component_for_entity(
             self.player_entity, CVelocity)
 
@@ -60,12 +63,11 @@ class PlayScene(Scene):
         self._p_s = self.ecs_world.component_for_entity(
             self.player_entity, CSurface)
 
+
         create_game_input(self.ecs_world)
         create_stars(self.ecs_world, self.config.starfield,
                      self._game_engine.screen_props)
 
-        """    create_enemy(self.ecs_world, pygame.Vector2(
-            100, 100), self.config.enemy[EnemyTypes.ENEMY_01.value]) """
         create_enemies_grid(
             self.ecs_world, self.config.level_01, self.config.enemy, self._game_engine.screen_props)
 
@@ -83,6 +85,7 @@ class PlayScene(Scene):
             system_screen_bullet(self.ecs_world, self.screen_rect)
             system_collision_bullet_enemy(
                 self.ecs_world, self.config.enemy_explosion)
+            system_player_state(self.ecs_world)
             system_animation(self.ecs_world, delta_time)
             system_delete_explosions(self.ecs_world)
 
@@ -104,9 +107,9 @@ class PlayScene(Scene):
             if action.phase == CommandPhase.START:
                 player_size = pygame.Vector2(
                     self._p_s.area.size[0], self._p_s.area.size[1])
-                max_bullets = 3
+                max_bullets = 1
                 current_bullets = len(self.ecs_world.get_component(CTagBullet))
-                if (current_bullets < max_bullets):  # TODO: change to use cd timer
+                if (current_bullets < max_bullets):
                     create_bullet(self.ecs_world, self._p_t.pos,
                                   self.config.bullet, player_size)
 
