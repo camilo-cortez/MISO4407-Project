@@ -2,15 +2,17 @@ import json
 
 import pygame
 
+from configurations.shared_config import Position
 from src.ecs.components.c_hitbox import CHitbox
 from src.ecs.components.c_player_state import CPlayerState, PlayerState
 from src.ecs.systems.s_collition_enemy_screen import system_collision_enemy_screen
 from src.ecs.systems.s_player_state import system_player_state
+from src.ecs.systems.s_refresh_score import system_refresh_score
 import src.engine.game_engine
 from configurations.global_config import GlobalConfig
 from src.create.prefab_creator_game import (create_bullet, create_enemies_grid,
                                             create_enemy, create_game_input,
-                                            create_player, create_stars)
+                                            create_player, create_score, create_stars)
 from src.create.prefab_creator_interface import (TextAlignment,
                                                  create_blink_text,
                                                  create_text)
@@ -63,7 +65,17 @@ class PlayScene(Scene):
         self._p_s = self.ecs_world.component_for_entity(
             self.player_entity, CSurface)
 
-
+        #score
+        score_header_text = create_text(self.ecs_world, "1-UP", 8,
+                                      interface["title_text"].color,
+                                      Position(self._game_engine.screen_props.top_left.x + 5, self._game_engine.screen_props.top_left.y + 5),
+                                      TextAlignment.LEFT)
+        self.score_text_ent = create_text(self.ecs_world, "000000", 8, #initial fixed width
+                                      interface["normal_text"].color,
+                                      Position(self._game_engine.screen_props.top_left.x + 10, self._game_engine.screen_props.top_left.y + 15),
+                                      TextAlignment.LEFT)
+        self.p_txt_score = self.ecs_world.component_for_entity(paused_text_ent, CSurface)
+        self.score_entity = create_score(self.ecs_world)
         create_game_input(self.ecs_world)
         create_stars(self.ecs_world, self.config.starfield,
                      self._game_engine.screen_props)
@@ -83,9 +95,9 @@ class PlayScene(Scene):
             system_blink(self.ecs_world, delta_time)
             system_movement(self.ecs_world, delta_time)
             system_screen_bullet(self.ecs_world, self.screen_rect)
-            system_collision_bullet_enemy(
-                self.ecs_world, self.config.enemy_explosion)
+            system_collision_bullet_enemy(self.ecs_world, self.config.enemy_explosion, self.score_entity)
             system_player_state(self.ecs_world)
+            system_refresh_score(self.ecs_world, self.score_text_ent)
             system_animation(self.ecs_world, delta_time)
             system_delete_explosions(self.ecs_world)
 
