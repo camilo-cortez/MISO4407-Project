@@ -18,6 +18,7 @@ from src.ecs.components.c_blink import CBlink
 from src.ecs.components.c_hitbox import CHitbox
 from src.ecs.components.c_input_command import CInputCommand
 from src.ecs.components.c_player_state import CPlayerState
+from src.ecs.components.c_score import CScore
 from src.ecs.components.c_star_spawner import CStarSpawner, StarSpawnEvent
 from src.ecs.components.c_transform import CTransform
 from src.ecs.components.tags.c_tag_bullet import CTagBullet
@@ -110,7 +111,7 @@ def create_enemy(world: esper.World, pos: pygame.Vector2, enemy_info: EnemyConfi
     width = enemy_surface.get_width() / enemy_info.animations.number_frames
     height = enemy_surface.get_height()
     world.add_component(enemy_entity, CAnimation(enemy_info.animations))
-    world.add_component(enemy_entity, CTagEnemy())
+    world.add_component(enemy_entity, CTagEnemy(enemy_info.score_value))
     world.add_component(enemy_entity, 
                         CHitbox(pygame.Rect(0, 0, width, height)))
     return enemy_entity
@@ -135,3 +136,8 @@ def create_enemies_grid(world: esper.World, level_config: LevelConfig, enemy_typ
         for col in row_info.positions:
             x = start_x + col * column_width
             create_enemy(world, pygame.Vector2(x, y), enemy_type)
+
+def create_score(world: esper.World):
+    score_entity = world.create_entity()
+    world.add_component(score_entity, CScore())
+    return score_entity
