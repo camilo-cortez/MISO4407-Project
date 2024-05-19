@@ -10,6 +10,7 @@ class EnemyConfig:
     sound: str
     image: str
     animations: Optional[AnimationInfo]
+    score_value: int
 
 
 class EnemyTypes(Enum):
