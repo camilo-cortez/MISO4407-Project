@@ -4,6 +4,7 @@ from typing import Dict, List
 
 import pygame
 
+from configurations.bullet_enemy_config import BulletEnemyConfig
 import esper
 from configurations.bullet_config import BulletConfig
 from configurations.enemy_config import EnemyConfig
@@ -22,6 +23,7 @@ from src.ecs.components.c_star_spawner import CStarSpawner, StarSpawnEvent
 from src.ecs.components.c_transform import CTransform
 from src.ecs.components.tags.c_tag_bullet import CTagBullet
 from src.ecs.components.tags.c_tag_enemy import CTagEnemy
+from src.ecs.components.tags.c_tag_enemy_bullet import CTagEnemyBullet
 from src.ecs.components.tags.c_tag_explosion import CTagExplosion
 from src.ecs.components.tags.c_tag_player import CTagPlayer
 from src.ecs.components.tags.c_tag_star import CTagStar
@@ -92,6 +94,16 @@ def create_bullet(world: esper.World, pos_player: pygame.Vector2, bullet_cfg: Bu
     bullet_entity = create_sprite(world, pos, vel, bullet_surface)
     world.add_component(bullet_entity, CTagBullet())
     ServiceLocator.sounds_service.play(bullet_cfg.sound)
+
+def create_enemy_bullet(world: esper.World, pos_enemy: pygame.Vector2, bullet_cfg: BulletEnemyConfig, enemy_size: pygame.Vector2):
+    bullet_surface = ServiceLocator.images_service.get(bullet_cfg.image)
+    bullet_size = bullet_surface.get_rect().size
+    vel_direction = pygame.Vector2(0, -1)
+    vel = vel_direction * bullet_cfg.velocity
+    pos = pygame.Vector2(pos_enemy.x + enemy_size.x/2 - (bullet_size[0] / 2),
+                         pos_enemy.y + enemy_size.y/2 - (bullet_size[1] * 2))
+    bullet_entity = create_sprite(world, pos, vel, bullet_surface)
+    world.add_component(bullet_entity, CTagEnemyBullet())
 
 
 def create_explosion(world: esper.World, pos: pygame.Vector2, explosion_cfg: ExplosionConfig):
