@@ -5,6 +5,7 @@ import pygame
 from src.ecs.components.c_hitbox import CHitbox
 from src.ecs.components.c_player_state import CPlayerState, PlayerState
 from src.ecs.systems.s_collition_enemy_screen import system_collision_enemy_screen
+from src.ecs.systems.s_enemy_bullet_firing import system_enemy_bullet_firing
 from src.ecs.systems.s_player_state import system_player_state
 import src.engine.game_engine
 from configurations.global_config import GlobalConfig
@@ -69,25 +70,24 @@ class PlayScene(Scene):
                      self._game_engine.screen_props)
 
         create_enemies_grid(
-            self.ecs_world, self.config.level_01, self.config.enemy, self._game_engine.screen_props)
+            self.ecs_world, self.config.level_01,self.config.enemy,self.config.enemy_bullet ,self._game_engine.screen_props)
+        
 
     def do_update(self, delta_time: float):
-        system_screen_player(self.ecs_world, self.screen_rect,
-                             self._game_engine.screen_props.margin)
-
+        system_screen_player(self.ecs_world, self.screen_rect, self._game_engine.screen_props.margin)
         system_star_position(self.ecs_world, self._game_engine.screen_props)
-        system_collision_enemy_screen(
-            self.ecs_world, self._game_engine.screen_props)
+        system_collision_enemy_screen(self.ecs_world, self._game_engine.screen_props)
 
         if not self._paused:
             system_blink(self.ecs_world, delta_time)
             system_movement(self.ecs_world, delta_time)
             system_screen_bullet(self.ecs_world, self.screen_rect)
-            system_collision_bullet_enemy(
-                self.ecs_world, self.config.enemy_explosion)
+            system_collision_bullet_enemy(self.ecs_world, self.config.enemy_explosion)
             system_player_state(self.ecs_world)
             system_animation(self.ecs_world, delta_time)
             system_delete_explosions(self.ecs_world)
+            system_enemy_bullet_firing(self.ecs_world, delta_time, self.config.enemy_bullet)
+
 
     def do_clean(self):
         self._paused = False

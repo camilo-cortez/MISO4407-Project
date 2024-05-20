@@ -4,6 +4,7 @@ from typing import Dict
 from dacite import from_dict
 
 from configurations.bullet_config import BulletConfig
+from configurations.bullet_enemy_config import BulletEnemyConfig
 from configurations.enemy_config import EnemyConfig
 from configurations.explosion_config import ExplosionConfig
 from configurations.interface_config import InterfaceItemConfig
@@ -22,6 +23,7 @@ class GlobalConfig:
     interface: Dict[str, InterfaceItemConfig] = field(init=False)
     player: PlayerConfig = field(init=False)
     bullet: BulletConfig = field(init=False)
+    enemy_bullet: BulletEnemyConfig = field(init=False)
     enemy_explosion: ExplosionConfig = field(init=False)
     enemy: Dict[str, EnemyConfig] = field(init=False)
     path: str
@@ -33,6 +35,7 @@ class GlobalConfig:
         self._load_interface_config()
         self._load_player_config()
         self._load_bullet_config()
+        self._load_bullet_enemy_config()
         self._load_enemy_explosion_config()
         self._load_enemy_config()
 
@@ -50,6 +53,9 @@ class GlobalConfig:
 
     def _load_bullet_config(self):
         self.bullet = self._load_config(BulletConfig, 'bullet.json')
+    
+    def _load_bullet_enemy_config(self):
+        self.enemy_bullet = self._load_config(BulletEnemyConfig, 'enemyBullet.json')
 
     def _load_enemy_explosion_config(self):
         self.enemy_explosion = self._load_config(

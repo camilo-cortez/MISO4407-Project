@@ -1,4 +1,5 @@
 {
     "image": "assets/img/enemy_bullet.png",
-    "velocity": 200
+    "velocity": 200,
+    "firing_interval": 1.5
 }
