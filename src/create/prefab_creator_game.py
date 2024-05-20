@@ -120,7 +120,7 @@ def create_enemy(world: esper.World, pos: pygame.Vector2, enemy_info: EnemyConfi
 def create_enemies_grid(world: esper.World, level_config: LevelConfig, enemy_types: Dict[str, EnemyConfig], screen_props: ScreenProperties):
     row_height = 15  # Altura en píxeles entre cada fila de enemigos.
     column_width = 18  # Ancho en píxeles entre cada columna de enemigos.
-    start_y = 10  # Posición inicial y desde donde comienzan los enemigos.
+    start_y = 40  # Posición inicial y desde donde comienzan los enemigos.
     # Calcula el número máximo de columnas de enemigos
     max_columns = max(len(row_info.positions)
                       for row_info in level_config.enemys_grid)

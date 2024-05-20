@@ -36,15 +36,11 @@ class MenuScene(Scene):
                                      CInputCommand("START_GAME", pygame.K_z))
 
     def do_update(self, delta_time: float):
-        """ system_star_spawner(
-            self.ecs_world, self._game_engine.delta_time, self._game_engine.screen_props) """
         system_star_position(self.ecs_world, self._game_engine.screen_props)
         system_blink(self.ecs_world, delta_time)
-      
 
         if not self._paused:
             system_movement(self.ecs_world, delta_time)
 
     def do_action(self, action: CInputCommand):
-        if action.name == "START_GAME":
-            self.switch_scene("PLAY_SCENE")
+        self.switch_scene("READY_SCENE")
