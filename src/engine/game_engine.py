@@ -12,6 +12,7 @@ from src.engine.scenes.scene import Scene
 from src.engine.screen_properties import ScreenProperties
 from src.game.menu_scene import MenuScene
 from src.game.play_scene import PlayScene
+from src.game.ready_scene import ReadyScene
 
 
 class GameEngine:
@@ -30,6 +31,7 @@ class GameEngine:
 
         self._scenes: dict[str, Scene] = {}
         self._scenes["MENU_SCENE"] = MenuScene(config, self)
+        self._scenes["READY_SCENE"] = ReadyScene(config, self)
         self._scenes["PLAY_SCENE"] = PlayScene(config, self)
         self._current_scene: Optional[Scene] = None
         self._scene_name_to_switch: str = None

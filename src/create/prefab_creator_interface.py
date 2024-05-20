@@ -1,12 +1,15 @@
 from enum import Enum
+from typing import Dict
 
 import pygame
 
+from configurations.interface_config import InterfaceItemConfig
 import esper
 from configurations.shared_config import Color, Position
 from src.ecs.components.c_blink import CBlink
 from src.ecs.components.c_surface import CSurface
 from src.ecs.components.c_transform import CTransform
+from src.engine.screen_properties import ScreenProperties
 from src.engine.service_locator import ServiceLocator
 
 
@@ -43,3 +46,18 @@ def create_blink_text(world: esper.World, txt: str, size: int,
 
     world.add_component(text_entity, CBlink(0.5))
     return text_entity
+
+
+def create_1up_text(ecs_world, interface: Dict[str, InterfaceItemConfig], screen_props: ScreenProperties):
+    return create_text(ecs_world, "1-UP", 8,
+                       interface["title_text"].color,
+                       Position(screen_props.top_left.x + 5,
+                                screen_props.top_left.y + 5),
+                       TextAlignment.LEFT)
+
+def create_score_text(ecs_world, interface: Dict[str, InterfaceItemConfig], screen_props: ScreenProperties):
+    return create_text(ecs_world, "000000", 8,
+                       interface["normal_text"].color,
+                       Position(screen_props.top_left.x + 10,
+                                screen_props.top_left.y + 15),
+                       TextAlignment.LEFT)
