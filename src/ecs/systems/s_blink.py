@@ -13,7 +13,8 @@ from src.engine.screen_properties import ScreenProperties
 
 def system_blink(world: esper.World, delta_time: float):
     for entity, (blink, surface) in world.get_components(CBlink, CSurface):
-        
+        if not blink.active:
+            continue
         blink.time_since_blink += delta_time
         if blink.time_since_blink >= blink.blink_rate:
             blink.visible = not blink.visible

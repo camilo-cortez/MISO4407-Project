@@ -3,6 +3,7 @@ import json
 import pygame
 
 from configurations.shared_config import Position
+from src.ecs.components.c_blink import CBlink
 from src.ecs.components.c_hitbox import CHitbox
 from src.ecs.components.c_player_state import CPlayerState, PlayerState
 from src.ecs.systems.s_collition_enemy_screen import system_collision_enemy_screen
@@ -14,7 +15,7 @@ from src.create.prefab_creator_game import (create_bullet, create_enemies_grid,
                                             create_enemy, create_game_input,
                                             create_player, create_score, create_stars)
 from src.create.prefab_creator_interface import (TextAlignment, create_1up_text,
-                                                 create_blink_text, create_score_text,
+                                                 create_blink_text, create_pause_text, create_score_text,
                                                  create_text)
 from src.ecs.components.c_input_command import CInputCommand, CommandPhase
 from src.ecs.components.c_surface import CSurface
@@ -31,6 +32,7 @@ from src.ecs.systems.s_screen_bullet import system_screen_bullet
 from src.ecs.systems.s_screen_player import system_screen_player
 from src.ecs.systems.s_star_position import system_star_position
 from src.engine.scenes.scene import Scene
+from src.engine.service_locator import ServiceLocator
 
 
 class PlayScene(Scene):
@@ -38,17 +40,17 @@ class PlayScene(Scene):
         super().__init__(engine)
         self._paused = False
         self.config = config
+        self.game_paused_sound = "assets/snd/game_paused.ogg"
 
     def do_create(self):
         interface = self._game_engine.config.interface
-
-        paused_text_ent = create_text(self.ecs_world, "PAUSED", 16,
-                                      interface["title_text"].color,
-                                      self._game_engine.screen_props.center,
-                                      TextAlignment.CENTER)
+        paused_text_ent = create_pause_text(
+            self.ecs_world, interface, self._game_engine.screen_props)
 
         self.p_txt_s = self.ecs_world.component_for_entity(
             paused_text_ent, CSurface)
+        self.p_txt_b = self.ecs_world.component_for_entity(
+            paused_text_ent, CBlink)
         self._paused = False
         self.p_txt_s.visible = self._paused
 
@@ -66,7 +68,7 @@ class PlayScene(Scene):
             self.player_entity, CSurface)
 
         # score
-        score_header_text = create_1up_text(
+        create_1up_text(
             self.ecs_world, interface, self._game_engine.screen_props)
         self.score_text_ent = create_score_text(
             self.ecs_world, interface, self._game_engine.screen_props)
@@ -88,9 +90,10 @@ class PlayScene(Scene):
         system_collision_enemy_screen(
             self.ecs_world, self._game_engine.screen_props)
 
+        system_blink(self.ecs_world, delta_time)
+        system_movement(self.ecs_world, delta_time, self._paused)
         if not self._paused:
-            system_blink(self.ecs_world, delta_time)
-            system_movement(self.ecs_world, delta_time)
+
             system_screen_bullet(self.ecs_world, self.screen_rect)
             system_collision_bullet_enemy(
                 self.ecs_world, self.config.enemy_explosion, self.score_entity)
@@ -126,3 +129,6 @@ class PlayScene(Scene):
         if action.name == "PAUSE" and action.phase == CommandPhase.START:
             self._paused = not self._paused
             self.p_txt_s.visible = self._paused
+            self.p_txt_b.active = self._paused
+            if self._paused:
+                ServiceLocator.sounds_service.play(self.game_paused_sound)

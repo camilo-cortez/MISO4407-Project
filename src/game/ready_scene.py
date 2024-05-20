@@ -47,6 +47,7 @@ class ReadyScene(Scene):
         self.ecs_world.add_component(timer_entity, CTimer(3.0))
 
     def do_update(self, delta_time: float):
+        system_blink(self.ecs_world, delta_time)
         system_timer_to_scene(self.ecs_world, delta_time,
                               self._game_engine, "PLAY_SCENE")
 
