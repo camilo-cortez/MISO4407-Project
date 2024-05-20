@@ -3,8 +3,8 @@ from typing import Dict
 
 import pygame
 
-from configurations.interface_config import InterfaceItemConfig
 import esper
+from configurations.interface_config import InterfaceItemConfig
 from configurations.shared_config import Color, Position
 from src.ecs.components.c_blink import CBlink
 from src.ecs.components.c_surface import CSurface
@@ -55,9 +55,21 @@ def create_1up_text(ecs_world, interface: Dict[str, InterfaceItemConfig], screen
                                 screen_props.top_left.y + 5),
                        TextAlignment.LEFT)
 
-def create_score_text(ecs_world, interface: Dict[str, InterfaceItemConfig], screen_props: ScreenProperties):
+
+def create_score_text(ecs_world: esper.World, interface: Dict[str, InterfaceItemConfig], screen_props: ScreenProperties):
     return create_text(ecs_world, "000000", 8,
                        interface["normal_text"].color,
                        Position(screen_props.top_left.x + 10,
                                 screen_props.top_left.y + 15),
                        TextAlignment.LEFT)
+
+
+def create_pause_text(ecs_world: esper.World, interface: Dict[str, InterfaceItemConfig], screen_props: ScreenProperties):
+    position = screen_props.center
+    position.y += 40
+    entity = create_text(ecs_world, "PAUSED", 8,
+                         interface["title_text"].color,
+                         screen_props.center,
+                         TextAlignment.CENTER)
+    ecs_world.add_component(entity, CBlink(0.5, False))
+    return entity
