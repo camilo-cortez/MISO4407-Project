@@ -1,3 +1,4 @@
+import copy
 from enum import Enum
 from typing import Dict
 
@@ -65,11 +66,9 @@ def create_score_text(ecs_world: esper.World, interface: Dict[str, InterfaceItem
 
 
 def create_pause_text(ecs_world: esper.World, interface: Dict[str, InterfaceItemConfig], screen_props: ScreenProperties):
-    position = screen_props.center
-    position.y += 40
     entity = create_text(ecs_world, "PAUSED", 8,
                          interface["title_text"].color,
-                         screen_props.center,
+                         Position(screen_props.center.x, screen_props.center.y + 40),
                          TextAlignment.CENTER)
     ecs_world.add_component(entity, CBlink(0.5, False))
     return entity
