@@ -71,8 +71,8 @@ def create_player(world: esper.World, player_cfg: PlayerConfig, screen_props: Sc
     world.add_component(entity, CAnimation(player_cfg.animations))
     world.add_component(entity, CTagPlayer())
     world.add_component(entity,
-                        CHitbox(pygame.FRect(0, 0,
-                                             surf.get_height(), surf.get_height())))
+                        CHitbox(pygame.FRect(0, 3,
+                                             surf.get_width()/2, surf.get_height()*0.9)))
     world.add_component(entity, CPlayerState())
     return entity
 
