@@ -1,3 +1,4 @@
+import time
 import pygame
 
 from configurations.global_config import GlobalConfig
@@ -25,6 +26,7 @@ class MenuScene(Scene):
 
         interface = self._game_engine.config.interface
         create_logo(self.ecs_world, self._game_engine.screen_props.center)
+        print(self._game_engine.screen_props.center)
         create_blink_text(self.ecs_world, "PRESS Z TO START", interface["title_text"].size,
                           interface["title_text"].color,
                           Position(self._game_engine.screen_props.center.x,

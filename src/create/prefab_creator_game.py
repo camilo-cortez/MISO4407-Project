@@ -51,6 +51,11 @@ def create_game_input(world: esper.World):
     world.add_component(player_fire_action,
                         CInputCommand("PLAYER_FIRE",
                                       pygame.K_z))
+    
+    game_over_action = world.create_entity()
+    world.add_component(game_over_action,
+                        CInputCommand("GAME_OVER",
+                                      pygame.K_x))
 
 
 def create_player(world: esper.World, player_cfg: PlayerConfig, screen_props: ScreenProperties):

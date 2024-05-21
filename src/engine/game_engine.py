@@ -10,6 +10,7 @@ from src.ecs.components.c_input_command import CInputCommand
 from src.ecs.systems.s_rendering import system_rendering
 from src.engine.scenes.scene import Scene
 from src.engine.screen_properties import ScreenProperties
+from src.game.game_over_scene import GameOverScene
 from src.game.menu_scene import MenuScene
 from src.game.play_scene import PlayScene
 from src.game.ready_scene import ReadyScene
@@ -33,6 +34,7 @@ class GameEngine:
         self._scenes["MENU_SCENE"] = MenuScene(config, self)
         self._scenes["READY_SCENE"] = ReadyScene(config, self)
         self._scenes["PLAY_SCENE"] = PlayScene(config, self)
+        self._scenes["GAME_OVER_SCENE"] = GameOverScene(config, self)
         self._current_scene: Optional[Scene] = None
         self._scene_name_to_switch: str = None
         self.screen_props = ScreenProperties(self.screen, 10)

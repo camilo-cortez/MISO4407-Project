@@ -125,10 +125,11 @@ class PlayScene(Scene):
                 if (current_bullets < max_bullets):
                     create_bullet(self.ecs_world, self._p_t.pos,
                                   self.config.bullet, player_size)
-
         if action.name == "PAUSE" and action.phase == CommandPhase.START:
             self._paused = not self._paused
             self.p_txt_s.visible = self._paused
             self.p_txt_b.active = self._paused
             if self._paused:
                 ServiceLocator.sounds_service.play(self.game_paused_sound)
+        if action.name == "GAME_OVER" and action.phase == CommandPhase.START: #TODO: use player death event
+            self.switch_scene("GAME_OVER_SCENE")
