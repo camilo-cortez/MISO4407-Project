@@ -2,36 +2,50 @@ import json
 
 import pygame
 
-from configurations.shared_config import Position
-from src.ecs.components.c_blink import CBlink
-from src.ecs.components.c_hitbox import CHitbox
-from src.ecs.components.c_player_state import CPlayerState, PlayerState
-from src.ecs.systems.s_collition_enemy_screen import system_collision_enemy_screen
-from src.ecs.systems.s_player_state import system_player_state
-from src.ecs.systems.s_refresh_level import system_refresh_level
-from src.ecs.systems.s_refresh_score import system_refresh_score
 import src.engine.game_engine
 from configurations.global_config import GlobalConfig
-from src.create.prefab_creator_game import (create_bullet, create_enemies_grid,
-                                            create_enemy, create_game_input,
-                                            create_player, create_score, create_stars, create_flag)
-from src.create.prefab_creator_interface import (TextAlignment, create_1up_text,
-                                                 create_blink_text, create_pause_text, create_score_text,
-                                                 create_text, create_level_text)
+from configurations.shared_config import Position
+from src.create.prefab_creator_game import (create_enemies_grid, create_enemy,
+                                            create_enemy_shooting, create_flag,
+                                            create_game_input, create_player,
+                                            create_player_bullet, create_score,
+                                            create_stars)
+from src.create.prefab_creator_interface import (TextAlignment,
+                                                 create_1up_text,
+                                                 create_blink_text,
+                                                 create_level_text,
+                                                 create_pause_text,
+                                                 create_score_text,
+                                                 create_text)
+from src.ecs.components.c_blink import CBlink
+from src.ecs.components.c_hitbox import CHitbox
 from src.ecs.components.c_input_command import CInputCommand, CommandPhase
+from src.ecs.components.c_player_state import CPlayerState, PlayerState
 from src.ecs.components.c_surface import CSurface
+from src.ecs.components.c_timer import CTimer
 from src.ecs.components.c_transform import CTransform
 from src.ecs.components.c_velocity import CVelocity
 from src.ecs.components.tags.c_tag_bullet import CTagBullet
 from src.ecs.systems.s_animation import system_animation
 from src.ecs.systems.s_blink import system_blink
+from src.ecs.systems.s_check_enemies_and_restart import \
+    system_check_enemies_and_restart
 from src.ecs.systems.s_collision_bullet_enemy import \
     system_collision_bullet_enemy
+from src.ecs.systems.s_collision_bullet_enemy_player import \
+    system_collision_bullet_player
+from src.ecs.systems.s_collition_enemy_screen import \
+    system_collision_enemy_screen
 from src.ecs.systems.s_delete_explosions import system_delete_explosions
+from src.ecs.systems.s_enemy_shooting import system_enemy_shooting
 from src.ecs.systems.s_movement import system_movement
+from src.ecs.systems.s_player_state import system_player_state
+from src.ecs.systems.s_refresh_level import system_refresh_level
+from src.ecs.systems.s_refresh_score import system_refresh_score
 from src.ecs.systems.s_screen_bullet import system_screen_bullet
 from src.ecs.systems.s_screen_player import system_screen_player
 from src.ecs.systems.s_star_position import system_star_position
+from src.ecs.systems.s_timer_to_scene import system_timer_to_scene
 from src.engine.scenes.scene import Scene
 from src.engine.service_locator import ServiceLocator
 
@@ -68,6 +82,9 @@ class PlayScene(Scene):
         self._p_s = self.ecs_world.component_for_entity(
             self.player_entity, CSurface)
 
+        self._p_state = self.ecs_world.component_for_entity(
+            self.player_entity, CPlayerState)
+
         # score
         create_1up_text(
             self.ecs_world, interface, self._game_engine.screen_props)
@@ -77,10 +94,14 @@ class PlayScene(Scene):
             paused_text_ent, CSurface)
         self.score_entity = create_score(self.ecs_world)
         create_flag(self.ecs_world, self._game_engine.screen_props)
-        create_level_text(self.ecs_world, interface, self._game_engine.screen_props)
+        self.level_text_ent = create_level_text(self.ecs_world, interface,
+                          self._game_engine.screen_props)
         create_game_input(self.ecs_world)
         create_stars(self.ecs_world, self.config.starfield,
                      self._game_engine.screen_props)
+
+        create_enemy_shooting(
+            self.ecs_world, self._game_engine.config.level_01)
 
         create_enemies_grid(
             self.ecs_world, self.config.level_01, self.config.enemy, self._game_engine.screen_props)
@@ -102,9 +123,21 @@ class PlayScene(Scene):
                 self.ecs_world, self.config.enemy_explosion, self.score_entity)
             system_player_state(self.ecs_world)
             system_refresh_score(self.ecs_world, self.score_text_ent)
-            system_refresh_level(self.ecs_world, self.score_text_ent)
+            system_refresh_level(self.ecs_world, self.level_text_ent)
             system_animation(self.ecs_world, delta_time)
             system_delete_explosions(self.ecs_world)
+            system_enemy_shooting(
+                self.ecs_world, delta_time, self._p_state)
+            system_collision_bullet_player(
+                self.ecs_world, self.config.player_explosion)
+            system_timer_to_scene(self.ecs_world, delta_time,
+                                  self._game_engine, "GAME_OVER_SCENE")
+            system_check_enemies_and_restart(
+                self.ecs_world, delta_time, self.config.level_01, self.config.enemy, self._game_engine.screen_props)
+
+            if self._p_state.state == PlayerState.DEAD and not self.ecs_world.has_component(self.player_entity, CTimer):
+                self.ecs_world.add_component(
+                    self.player_entity, CTimer(duration=2.0))
 
     def do_clean(self):
         self._paused = False
@@ -127,13 +160,11 @@ class PlayScene(Scene):
                 max_bullets = 1
                 current_bullets = len(self.ecs_world.get_component(CTagBullet))
                 if (current_bullets < max_bullets):
-                    create_bullet(self.ecs_world, self._p_t.pos,
-                                  self.config.bullet, player_size)
+                    create_player_bullet(self.ecs_world, self._p_t.pos,
+                                         self.config.bullet, player_size)
         if action.name == "PAUSE" and action.phase == CommandPhase.START:
             self._paused = not self._paused
             self.p_txt_s.visible = self._paused
             self.p_txt_b.active = self._paused
             if self._paused:
                 ServiceLocator.sounds_service.play(self.game_paused_sound)
-        if action.name == "GAME_OVER" and action.phase == CommandPhase.START: #TODO: use player death event
-            self.switch_scene("GAME_OVER_SCENE")

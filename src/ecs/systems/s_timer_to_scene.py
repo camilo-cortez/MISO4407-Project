@@ -1,4 +1,3 @@
-# src/ecs/systems/s_timer.py
 
 import esper
 from src.ecs.components.c_timer import CTimer

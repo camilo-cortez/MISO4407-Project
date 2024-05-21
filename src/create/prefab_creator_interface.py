@@ -5,10 +5,10 @@ from typing import Dict
 import pygame
 
 import esper
-import copy
 from configurations.interface_config import InterfaceItemConfig
 from configurations.shared_config import Color, Position
 from src.ecs.components.c_blink import CBlink
+from src.ecs.components.c_level import CLevel
 from src.ecs.components.c_surface import CSurface
 from src.ecs.components.c_transform import CTransform
 from src.engine.screen_properties import ScreenProperties
@@ -65,18 +65,22 @@ def create_score_text(ecs_world: esper.World, interface: Dict[str, InterfaceItem
                                 screen_props.top_left.y + 15),
                        TextAlignment.LEFT)
 
+
 def create_level_text(ecs_world: esper.World, interface: Dict[str, InterfaceItemConfig], screen_props: ScreenProperties):
-    return create_text(ecs_world, "01", 8,
-                       interface["normal_text"].color,
-                       Position(screen_props.top_right.x - 10,
-                                screen_props.top_right.y + 15),
-                       TextAlignment.RIGHT)
+    entity = create_text(ecs_world, "01", 8,
+                         interface["normal_text"].color,
+                         Position(screen_props.top_right.x - 10,
+                                  screen_props.top_right.y + 15),
+                         TextAlignment.RIGHT)
+    ecs_world.add_component(entity, CLevel())
+    return entity
 
 
 def create_pause_text(ecs_world: esper.World, interface: Dict[str, InterfaceItemConfig], screen_props: ScreenProperties):
     entity = create_text(ecs_world, "PAUSED", 8,
                          interface["title_text"].color,
-                         Position(screen_props.center.x, screen_props.center.y + 40),
+                         Position(screen_props.center.x,
+                                  screen_props.center.y + 40),
                          TextAlignment.CENTER)
     ecs_world.add_component(entity, CBlink(0.5, False))
     return entity
