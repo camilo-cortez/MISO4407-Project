@@ -70,7 +70,7 @@ class PlayScene(Scene):
                      self._game_engine.screen_props)
 
         create_enemies_grid(
-            self.ecs_world, self.config.level_01,self.config.enemy,self.config.enemy_bullet ,self._game_engine.screen_props)
+            self.ecs_world, self.config.level_01,self.config.enemy,self._game_engine.screen_props)
         
 
     def do_update(self, delta_time: float):

@@ -5,12 +5,12 @@ from src.ecs.components.c_hitbox import CHitbox
 from src.ecs.components.c_surface import CSurface
 from src.ecs.components.c_transform import CTransform
 from src.ecs.components.tags.c_tag_enemy import CTagEnemy
-from src.ecs.components.tags.c_tag_bullet import CTagBullet
 from src.ecs.components.c_hitbox import CHitbox, get_rect_relative
+from src.ecs.components.tags.c_tag_enemy_bullet import CTagEnemyBullet
 
 def system_collision_bullet_player(world:esper.World, explosion_cfg:ExplosionConfig):
     enemy_components = world.get_components(CHitbox, CTransform, CTagEnemy)
-    bullet_components = world.get_components(CSurface, CTransform, CTagBullet)
+    bullet_components = world.get_components(CSurface, CTransform, CTagEnemyBullet)
     c_s: CSurface
     c_he: CHitbox
     c_t: CTransform

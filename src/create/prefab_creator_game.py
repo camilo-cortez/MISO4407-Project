@@ -116,7 +116,7 @@ def create_explosion(world: esper.World, pos: pygame.Vector2, explosion_cfg: Exp
     ServiceLocator.sounds_service.play(explosion_cfg.sound)
 
 
-def create_enemy(world: esper.World, pos: pygame.Vector2, enemy_info: EnemyConfig, bullet_cfg: BulletEnemyConfig):
+def create_enemy(world: esper.World, pos: pygame.Vector2, enemy_info: EnemyConfig):
     enemy_surface = ServiceLocator.images_service.get(enemy_info.image)
     velocity = pygame.Vector2(10, 0)
     enemy_entity = create_sprite(world, pos, velocity, enemy_surface)
@@ -125,16 +125,16 @@ def create_enemy(world: esper.World, pos: pygame.Vector2, enemy_info: EnemyConfi
     world.add_component(enemy_entity, CAnimation(enemy_info.animations))
     world.add_component(enemy_entity, CTagEnemy())
     world.add_component(enemy_entity, CHitbox(pygame.Rect(0, 0, width, height)))
-    world.add_component(enemy_entity, CEnemyFiring(enemy_info.firing_interval))
+    #world.add_component(enemy_entity, CEnemyFiring(enemy_info.firing_interval)) Para manejar el intervalo
     return enemy_entity
 
 
 
 
-def create_enemies_grid(world: esper.World, level_config: LevelConfig, enemy_types: Dict[str, EnemyConfig], bullet_cfg: BulletEnemyConfig, screen_props: ScreenProperties, bullet_cfgs: Dict[str, BulletEnemyConfig]):
+def create_enemies_grid(world: esper.World, level_config: LevelConfig, enemy_types: Dict[str, EnemyConfig], screen_props: ScreenProperties):
     row_height = 15  # Altura en píxeles entre cada fila de enemigos.
     column_width = 18  # Ancho en píxeles entre cada columna de enemigos.
-    start_y = 10  # Posición inicial y desde donde comienzan los enemigos.
+    start_y = 40  # Posición inicial y desde donde comienzan los enemigos.
     # Calcula el número máximo de columnas de enemigos
     max_columns = max(len(row_info.positions)
                       for row_info in level_config.enemys_grid)
@@ -143,10 +143,10 @@ def create_enemies_grid(world: esper.World, level_config: LevelConfig, enemy_typ
     # Calcula start_x para centrar la grilla
     start_x = (screen_props.width - total_grid_width) // 2
 
+    # Iteramos a través de la configuración del nivel para crear la grilla de enemigos
     for row_info in level_config.enemys_grid:
         enemy_type = enemy_types[row_info.type]
-        bullet_cfg = bullet_cfgs[row_info.type]  # Obtener la configuración de la bala correspondiente al tipo de enemigo
         y = start_y + row_info.row * row_height
         for col in row_info.positions:
             x = start_x + col * column_width
-            create_enemy(world, pygame.Vector2(x, y), enemy_type, bullet_cfg)  # Pasar la configuración de la bala al crear el enemigo
+            create_enemy(world, pygame.Vector2(x, y), enemy_type)
