@@ -9,7 +9,8 @@ from src.ecs.components.tags.c_tag_enemy import CTagEnemy
 from src.ecs.components.tags.c_tag_bullet import CTagBullet
 from src.ecs.components.c_hitbox import CHitbox, get_rect_relative
 
-def system_collision_bullet_enemy(world:esper.World, explosion_cfg:ExplosionConfig, score_entity:int):
+
+def system_collision_bullet_enemy(world: esper.World, explosion_cfg: ExplosionConfig, score_entity: int):
     enemy_components = world.get_components(CHitbox, CTransform, CTagEnemy)
     bullet_components = world.get_components(CSurface, CTransform, CTagBullet)
     score_comp = world.component_for_entity(score_entity, CScore)
