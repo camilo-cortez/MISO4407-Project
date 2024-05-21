@@ -57,10 +57,11 @@ def create_game_input(world: esper.World):
     world.add_component(game_over_action,
                         CInputCommand("GAME_OVER",
                                       pygame.K_x))
+    
     next_level_action = world.create_entity()
     world.add_component(next_level_action,
                         CInputCommand("NEXT_LEVEL",
-                                      pygame.K_t))
+                                      pygame.K_n))
 
 
 def create_player(world: esper.World, player_cfg: PlayerConfig, screen_props: ScreenProperties):

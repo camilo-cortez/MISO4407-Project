@@ -65,8 +65,8 @@ def create_score_text(ecs_world: esper.World, interface: Dict[str, InterfaceItem
                                 screen_props.top_left.y + 15),
                        TextAlignment.LEFT)
 
-def create_level_text(ecs_world: esper.World, interface: Dict[str, InterfaceItemConfig], screen_props: ScreenProperties):
-    return create_text(ecs_world, "01", 8,
+def create_level_text(ecs_world: esper.World, interface: Dict[str, InterfaceItemConfig], screen_props: ScreenProperties, texto: int):
+    return create_text(ecs_world, str(texto), 8,
                        interface["normal_text"].color,
                        Position(screen_props.top_right.x - 10,
                                 screen_props.top_right.y + 15),

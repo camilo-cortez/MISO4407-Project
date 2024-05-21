@@ -6,6 +6,7 @@ from configurations.shared_config import Position
 from src.ecs.components.c_blink import CBlink
 from src.ecs.components.c_hitbox import CHitbox
 from src.ecs.components.c_player_state import CPlayerState, PlayerState
+from src.ecs.components.tags.c_tag_enemy import CTagEnemy
 from src.ecs.systems.s_collition_enemy_screen import system_collision_enemy_screen
 from src.ecs.systems.s_player_state import system_player_state
 from src.ecs.systems.s_refresh_level import system_refresh_level
@@ -42,6 +43,8 @@ class PlayScene(Scene):
         self._paused = False
         self.config = config
         self.game_paused_sound = "assets/snd/game_paused.ogg"
+        self.current_level = 1
+        self.enemies_killed = 0
 
     def do_create(self):
         interface = self._game_engine.config.interface
@@ -77,7 +80,7 @@ class PlayScene(Scene):
             paused_text_ent, CSurface)
         self.score_entity = create_score(self.ecs_world)
         create_flag(self.ecs_world, self._game_engine.screen_props)
-        create_level_text(self.ecs_world, interface, self._game_engine.screen_props)
+        self.level_text_ent= create_level_text(self.ecs_world, interface, self._game_engine.screen_props, self.current_level)
         create_game_input(self.ecs_world)
         create_stars(self.ecs_world, self.config.starfield,
                      self._game_engine.screen_props)
@@ -102,9 +105,20 @@ class PlayScene(Scene):
                 self.ecs_world, self.config.enemy_explosion, self.score_entity)
             system_player_state(self.ecs_world)
             system_refresh_score(self.ecs_world, self.score_text_ent)
-            system_refresh_level(self.ecs_world, self.score_text_ent)
+            system_refresh_level(self.ecs_world, self.level_text_ent)
             system_animation(self.ecs_world, delta_time)
             system_delete_explosions(self.ecs_world)
+
+            enemies = self.ecs_world.get_component(CTagEnemy)
+            if not enemies:
+                self.current_level += 1
+                self.enemies_killed = 0
+                self._refresh_enemies() 
+
+    def _refresh_enemies(self):
+        self.clean()
+        self.do_create()
+        
 
     def do_clean(self):
         self._paused = False
@@ -137,3 +151,7 @@ class PlayScene(Scene):
                 ServiceLocator.sounds_service.play(self.game_paused_sound)
         if action.name == "GAME_OVER" and action.phase == CommandPhase.START: #TODO: use player death event
             self.switch_scene("GAME_OVER_SCENE")
+        if action.name == "NEXT_LEVEL" and action.phase == CommandPhase.START:
+            self.current_level += 1
+            self.enemies_killed = 0
+            self._refresh_enemies()    
