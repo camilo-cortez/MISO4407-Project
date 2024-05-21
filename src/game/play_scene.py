@@ -8,15 +8,16 @@ from src.ecs.components.c_hitbox import CHitbox
 from src.ecs.components.c_player_state import CPlayerState, PlayerState
 from src.ecs.systems.s_collition_enemy_screen import system_collision_enemy_screen
 from src.ecs.systems.s_player_state import system_player_state
+from src.ecs.systems.s_refresh_level import system_refresh_level
 from src.ecs.systems.s_refresh_score import system_refresh_score
 import src.engine.game_engine
 from configurations.global_config import GlobalConfig
 from src.create.prefab_creator_game import (create_bullet, create_enemies_grid,
                                             create_enemy, create_game_input,
-                                            create_player, create_score, create_stars)
+                                            create_player, create_score, create_stars, create_flag)
 from src.create.prefab_creator_interface import (TextAlignment, create_1up_text,
                                                  create_blink_text, create_pause_text, create_score_text,
-                                                 create_text)
+                                                 create_text, create_level_text)
 from src.ecs.components.c_input_command import CInputCommand, CommandPhase
 from src.ecs.components.c_surface import CSurface
 from src.ecs.components.c_transform import CTransform
@@ -75,6 +76,8 @@ class PlayScene(Scene):
         self.p_txt_score = self.ecs_world.component_for_entity(
             paused_text_ent, CSurface)
         self.score_entity = create_score(self.ecs_world)
+        create_flag(self.ecs_world, self._game_engine.screen_props)
+        create_level_text(self.ecs_world, interface, self._game_engine.screen_props)
         create_game_input(self.ecs_world)
         create_stars(self.ecs_world, self.config.starfield,
                      self._game_engine.screen_props)
@@ -99,6 +102,7 @@ class PlayScene(Scene):
                 self.ecs_world, self.config.enemy_explosion, self.score_entity)
             system_player_state(self.ecs_world)
             system_refresh_score(self.ecs_world, self.score_text_ent)
+            system_refresh_level(self.ecs_world, self.score_text_ent)
             system_animation(self.ecs_world, delta_time)
             system_delete_explosions(self.ecs_world)
 

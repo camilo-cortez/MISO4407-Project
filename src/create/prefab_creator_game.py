@@ -17,6 +17,7 @@ from src.ecs.components.c_animation import CAnimation
 from src.ecs.components.c_blink import CBlink
 from src.ecs.components.c_hitbox import CHitbox
 from src.ecs.components.c_input_command import CInputCommand
+from src.ecs.components.c_level import CLevel
 from src.ecs.components.c_player_state import CPlayerState
 from src.ecs.components.c_score import CScore
 from src.ecs.components.c_star_spawner import CStarSpawner, StarSpawnEvent
@@ -56,6 +57,10 @@ def create_game_input(world: esper.World):
     world.add_component(game_over_action,
                         CInputCommand("GAME_OVER",
                                       pygame.K_x))
+    next_level_action = world.create_entity()
+    world.add_component(next_level_action,
+                        CInputCommand("NEXT_LEVEL",
+                                      pygame.K_t))
 
 
 def create_player(world: esper.World, player_cfg: PlayerConfig, screen_props: ScreenProperties):
@@ -151,3 +156,17 @@ def create_score(world: esper.World):
     score_entity = world.create_entity()
     world.add_component(score_entity, CScore())
     return score_entity
+
+def create_level(world: esper.World):
+    level_entity = world.create_entity()
+    world.add_component(level_entity, CLevel())
+    return level_entity
+
+def create_flag(world: esper.World, screen_props: ScreenProperties):
+    surf = ServiceLocator.images_service.get('./assets/img/invaders_level_flag.png')
+
+    vel = Position(0, 0)
+    pos_x = screen_props.top_right.x - surf.get_width() - 30
+    pos_y = screen_props.top_right.y - surf.get_height() + 25
+    entity = create_sprite(world, Position(pos_x, pos_y), vel, surf)
+    return entity
