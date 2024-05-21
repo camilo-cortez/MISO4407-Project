@@ -1,3 +1,3 @@
 class CLevel:
     def __init__(self) -> None:
-        self.level = 0
+        self.level = 1

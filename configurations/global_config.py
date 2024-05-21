@@ -23,6 +23,7 @@ class GlobalConfig:
     player: PlayerConfig = field(init=False)
     bullet: BulletConfig = field(init=False)
     enemy_explosion: ExplosionConfig = field(init=False)
+    player_explosion: ExplosionConfig = field(init=False)
     enemy: Dict[str, EnemyConfig] = field(init=False)
     path: str
 
@@ -34,6 +35,7 @@ class GlobalConfig:
         self._load_player_config()
         self._load_bullet_config()
         self._load_enemy_explosion_config()
+        self._load_player_explosion_config()
         self._load_enemy_config()
 
     def _load_window_config(self):
@@ -54,6 +56,10 @@ class GlobalConfig:
     def _load_enemy_explosion_config(self):
         self.enemy_explosion = self._load_config(
             ExplosionConfig, 'enemy_explosion.json')
+
+    def _load_player_explosion_config(self):
+        self.player_explosion = self._load_config(
+            ExplosionConfig, 'player_explosion.json')
 
     def _load_enemy_config(self):
         data = load_json(self.path + 'enemy.json')

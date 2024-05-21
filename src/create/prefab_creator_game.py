@@ -10,11 +10,12 @@ from configurations.enemy_config import EnemyConfig
 from configurations.explosion_config import ExplosionConfig
 from configurations.level_config import LevelConfig
 from configurations.player_config import PlayerConfig
-from configurations.shared_config import Position
+from configurations.shared_config import Color, Position
 from configurations.starfield_config import StarFieldConfig
 from src.create.prefab_creator import create_sprite, create_square
 from src.ecs.components.c_animation import CAnimation
 from src.ecs.components.c_blink import CBlink
+from src.ecs.components.c_enemy_shooting import CEnemyShooting
 from src.ecs.components.c_hitbox import CHitbox
 from src.ecs.components.c_input_command import CInputCommand
 from src.ecs.components.c_level import CLevel
@@ -25,6 +26,7 @@ from src.ecs.components.c_surface import CSurface
 from src.ecs.components.c_transform import CTransform
 from src.ecs.components.c_velocity import CVelocity
 from src.ecs.components.tags.c_tag_bullet import CTagBullet
+from src.ecs.components.tags.c_tag_bullet_enemy import CTagBulletEnemy
 from src.ecs.components.tags.c_tag_enemy import CTagEnemy
 from src.ecs.components.tags.c_tag_explosion import CTagExplosion
 from src.ecs.components.tags.c_tag_player import CTagPlayer
@@ -52,11 +54,7 @@ def create_game_input(world: esper.World):
     world.add_component(player_fire_action,
                         CInputCommand("PLAYER_FIRE",
                                       pygame.K_z))
-    
-    game_over_action = world.create_entity()
-    world.add_component(game_over_action,
-                        CInputCommand("GAME_OVER",
-                                      pygame.K_x))
+
     next_level_action = world.create_entity()
     world.add_component(next_level_action,
                         CInputCommand("NEXT_LEVEL",
@@ -97,7 +95,18 @@ def create_stars(world: esper.World, config: StarFieldConfig, screen_props: Scre
         world.add_component(star_entity, CTagStar())
 
 
-def create_bullet(world: esper.World, pos_player: pygame.Vector2, bullet_cfg: BulletConfig, player_size: pygame.Vector2):
+def create_enemy_shooting(world: esper.World, level_config: LevelConfig):
+    entity = world.create_entity()
+    world.add_component(entity, CEnemyShooting(
+        elapsed_time=0,
+        next_shoot_time=random.uniform(
+            level_config.shoot_enemys_config.shoot_frecuency.min, level_config.shoot_enemys_config.shoot_frecuency.max),
+        shoot_config=level_config.shoot_enemys_config,
+        bullet_config=level_config.shoot_enemys_config.bullet
+    ))
+
+
+def create_player_bullet(world: esper.World, pos_player: pygame.Vector2, bullet_cfg: BulletConfig, player_size: pygame.Vector2):
     bullet_surface = ServiceLocator.images_service.get(bullet_cfg.image)
     bullet_size = bullet_surface.get_rect().size
     vel_direction = pygame.Vector2(0, -1)
@@ -107,6 +116,17 @@ def create_bullet(world: esper.World, pos_player: pygame.Vector2, bullet_cfg: Bu
     bullet_entity = create_sprite(world, pos, vel, bullet_surface)
     world.add_component(bullet_entity, CTagBullet())
     ServiceLocator.sounds_service.play(bullet_cfg.sound)
+
+
+def create_enemy_bullet(world: esper.World, pos_enemy: pygame.Vector2, bullet_cfg: BulletConfig, player_size: pygame.Vector2):
+    vel_direction = pygame.Vector2(0, 1)
+    vel = vel_direction * bullet_cfg.velocity
+    pos = pygame.Vector2(pos_enemy.x + player_size.x/2,
+                         pos_enemy.y + player_size.y/2)
+    bullet = create_square(world, Position(
+        1, 3), Color(255, 255, 255), pos, vel)
+
+    world.add_component(bullet, CTagBulletEnemy())
 
 
 def create_explosion(world: esper.World, pos: pygame.Vector2, explosion_cfg: ExplosionConfig):
@@ -157,13 +177,16 @@ def create_score(world: esper.World):
     world.add_component(score_entity, CScore())
     return score_entity
 
+
 def create_level(world: esper.World):
     level_entity = world.create_entity()
     world.add_component(level_entity, CLevel())
     return level_entity
 
+
 def create_flag(world: esper.World, screen_props: ScreenProperties):
-    surf = ServiceLocator.images_service.get('./assets/img/invaders_level_flag.png')
+    surf = ServiceLocator.images_service.get(
+        './assets/img/invaders_level_flag.png')
 
     vel = Position(0, 0)
     pos_x = screen_props.top_right.x - surf.get_width() - 30

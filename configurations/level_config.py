@@ -1,8 +1,7 @@
 from dataclasses import dataclass
 from typing import List
 
-from configurations.enemy_config import EnemyTypes
-from configurations.shared_config import Color
+from configurations.bullet_config import BulletConfig
 
 
 @dataclass
@@ -13,5 +12,25 @@ class GridConfig:
 
 
 @dataclass
+class EnemysShooting:
+    min: int
+    max: int
+
+
+@dataclass
+class ShootFrecuency:
+    min: int
+    max: int
+
+
+@dataclass
+class ShootEnemysConfig:
+    bullets_count: EnemysShooting
+    shoot_frecuency: ShootFrecuency
+    bullet: BulletConfig
+
+
+@dataclass
 class LevelConfig:
     enemys_grid: List[GridConfig]
+    shoot_enemys_config: ShootEnemysConfig
